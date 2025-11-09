@@ -7,6 +7,31 @@
  *  to obtain a copy of the license text.
 */
 
-int main(int argc, char** argv) {
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
+int main(int argc, char** argv) {
+    int i = 1;
+    std::ifstream message_file; // a file input stream to hold the message
+    std::fstream key_file; // a file input/output stream to use the key
+    std::ofstream crypt_file; // a file output stream to write the cyphertext
+    while (i < argc) { // loop until out of inputs
+        if (argv[i][0] == '-' && argv[i][1] == 'm' && argc > i+1) { // message file
+            ++i;
+            message_file.open(argv[i]);
+        } else if (argv[i][0] == '-' && argv[i][1] == 'k' && argc > i+1) { // key file
+            ++i;
+            key_file.open(argv[i]);
+        } else if (argv[i][0] == '-' && argv[i][1] == 'o' && argc > i+1) { // cyphertext file
+            ++i;
+            crypt_file.open(argv[i]);
+        }
+        ++i;
+    }
+    if (!message_file.is_open() || !key_file.is_open() || !crypt_file.is_open()) {
+        // complain if any files aren't open
+        throw std::invalid_argument("Incorrect arguments. Format should be (in any order):\n\
+                -m (message file) -k (key file) -o (output file)");
+    }
 }
