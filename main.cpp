@@ -69,12 +69,16 @@ int main(int argc, char** argv) {
             out_file.put(encrypt(mch, kch, enc));
         }
     }
-    if (key_left) {
+    if (key_left && del) {
         std::ofstream temp_key(".keyfile.temp");
         while (key_file.get(kch)) {
             temp_key.put(kch);
         }
-        key_file.close();
+        temp_key.close();
         std::rename(".keyfile.temp", key_name);
     }
+    key_file.close();
+    message_file.close();
+    out_file.close();
+    return 0;
 }
