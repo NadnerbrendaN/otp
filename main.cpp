@@ -7,31 +7,69 @@
  *  to obtain a copy of the license text.
 */
 
+#include <cstdio>
+#include <vector>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
+char encrypt(char m, char k, bool e) {
+    if (e) {
+        return m+k;
+    } else {
+        return m-k;
+    }
+}
+
 int main(int argc, char** argv) {
     int i = 1;
     std::ifstream message_file; // a file input stream to hold the message
-    std::fstream key_file; // a file input/output stream to use the key
-    std::ofstream crypt_file; // a file output stream to write the cyphertext
+    std::ifstream key_file; // a file input/output stream to use the key
+    char* key_name;
+    std::ofstream out_file; // a file output stream to write the cyphertext
+    char* out_name;
+    bool enc = false;
     while (i < argc) { // loop until out of inputs
         if (argv[i][0] == '-' && argv[i][1] == 'm' && argc > i+1) { // message file
             ++i;
             message_file.open(argv[i]);
         } else if (argv[i][0] == '-' && argv[i][1] == 'k' && argc > i+1) { // key file
             ++i;
-            key_file.open(argv[i]);
+            key_name = argv[i];
+            key_file.open(key_name);
         } else if (argv[i][0] == '-' && argv[i][1] == 'o' && argc > i+1) { // cyphertext file
             ++i;
-            crypt_file.open(argv[i]);
+            out_file.open(argv[i]);
+        } else if (argv[i][0] == '-' && argv[i][1] == 'e') {
+            enc = true;
         }
         ++i;
     }
-    if (!message_file.is_open() || !key_file.is_open() || !crypt_file.is_open()) {
+    if (!message_file.is_open() || !key_file.is_open() || !out_file.is_open()) {
         // complain if any files aren't open
-        throw std::invalid_argument("Incorrect arguments. Format should be (in any order):\n\
-                -m (message file) -k (key file) -o (output file)");
+        std::cout << "Usage: otp [OPTIONS]\n\nRequired options:\n\
+-m (message file)\n-k (key file)\n-o (output file)\n";
+        return 1;
+    }
+
+    char mch;
+    char kch;
+    bool key_left = true;
+    while (message_file.get(mch) && key_left) {
+        if (!key_file.get(kch)) {
+            std::cout << "Key too short:\nTry adding more data to the key or writing a shorter message.\n";
+            key_left = false;
+            std::remove(out_name);
+        } else {
+            out_file.put(encrypt(mch, kch, enc));
+        }
+    }
+    if (key_left) {
+        std::ofstream temp_key(".keyfile.temp");
+        while (key_file.get(kch)) {
+            temp_key.put(kch);
+        }
+        key_file.close();
+        std::rename(".keyfile.temp", key_name);
     }
 }
