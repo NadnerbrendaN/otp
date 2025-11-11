@@ -29,6 +29,7 @@ int main(int argc, char** argv) {
     std::ofstream out_file; // a file output stream to write the cyphertext
     char* out_name;
     bool enc = false;
+    bool del = false;
     while (i < argc) { // loop until out of inputs
         if (argv[i][0] == '-' && argv[i][1] == 'm' && argc > i+1) { // message file
             ++i;
@@ -42,13 +43,17 @@ int main(int argc, char** argv) {
             out_file.open(argv[i]);
         } else if (argv[i][0] == '-' && argv[i][1] == 'e') {
             enc = true;
+        } else if (argv[i][0] == '-' && argv[i][1] == 'd') {
+            del = true;
         }
         ++i;
     }
     if (!message_file.is_open() || !key_file.is_open() || !out_file.is_open()) {
         // complain if any files aren't open
-        std::cout << "Usage: otp [OPTIONS]\n\nRequired options:\n\
--m (message file)\n-k (key file)\n-o (output file)\n";
+        std::cout << "Usage: otp [FLAGS, FILES, and OPTIONS]\n\nRequired flags:\n\
+-m (message file)\n-k (key file)\n-o (output file)\n\nOptions:\n\
+-d\n    Delete used key data\n\
+-e\n    Encrypt the message, instead of the default decryption setting.\n";
         return 1;
     }
 
