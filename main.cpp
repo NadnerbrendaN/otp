@@ -8,46 +8,72 @@
 */
 
 #include <cstdio>
-#include <cstdint>
 #include <fstream>
-#include <sstream>
 #include <iostream>
 
-enum Mode {
+enum Mode { // available options for the running mode
     UNSET,
-    SET_SEED,
-    ASCII,
+    BYTE,
 };
 
-char enc_ascii(char m, char k, bool e) {
-    if (e) {
+char enc_byte(char m, char k, bool e) { // encrypt one byte with another byte
+    if (e) { // switch based on encrypt/decrypt
         return m+k;
     } else {
         return m-k;
     }
 }
 
-int encrypt(Mode mode, char* message_name, char* key_name, char* out_name, bool enc, bool del) {
+void complain(Mode mode) { // exit with errors and message based on mode
+    switch (mode) {
+        case UNSET: // no given mode --> explain that a mode is needed
+            std::cout << "Usage: otp (mode) [FLAGS, FILES, and OPTIONS]\n\nMode possibilities:\n\
+\tbyte (or anything starting with 'b')\n\t\tSets the system to BYTE mode.\n\
+\n\tBYTE mode:\n\
+\tEncrypts the message with the key byte by byte. The most basic mode. Required flags:\n\
+\t\t-m (message file)\n\t\t-k (key file)\n\t\t-o (output file)\n\nOptions:\n\
+\t-d\n\t\tDelete used key data\n\
+\t-e\n\t\tEncrypt the message, instead of the default decryption setting.\n";
+            break;
+        case BYTE: // byte mode but one or more missing flags --> explain available flags
+            std::cout << "BYTE mode requires these flags:\n\
+\t-m (message file)\n\t-k (key file)\n\t-o (output file)\n\nOptions:\n\
+\t-d\n\t\tDelete used key data\n\
+\t-e\n\t\tEncrypt the message, instead of the default decryption setting.\n";
+            break;
+    }
+}
+
+int encrypt(Mode mode, char* message_name, char* key_name, char* out_name, bool enc, bool del, bool seed) {
     std::ifstream message_file; // a file input stream from which to read the message
-    std::ifstream key_file; // a file input stream from which to read the key
+    std::ifstream key_file; // a file input stream from which to read the key/seed
     std::ofstream out_file; // a file output stream to write the cyphertext to
     message_file.open(message_name);
     key_file.open(key_name);
     out_file.open(out_name);
-    if (!message_file.is_open() || !key_file.is_open() || !out_file.is_open()) {
-        // complain if any files aren't open
-        std::cout << "ASCII mode requires these flags:\n\
--m (message file)\n-k (key file)\n-o (output file)\n\nOptions:\n\
--d\n    Delete used key data\n\
--e\n    Encrypt the message, instead of the default decryption setting.\n";
-        return 1;
+    if (!message_file.is_open() || !key_file.is_open() || !out_file.is_open()) { // catch missing files
+        int n = 0;
+        if (!message_file.is_open()) {
+            std::cout << "File not found: " << message_name << '\n';
+            n++;
+        }
+        if (!key_file.is_open()) {
+            std::cout << "File not found: " << key_name << '\n';
+            n++;
+        }
+        if (!out_file.is_open()) n++; // (I think this technically shouldn't happen but whatever)
+        message_file.close();
+        key_file.close(); // close all files for propriety
+        out_file.close();
+        std::remove(out_name);
+        return n;
     }
 
     char mch;
     char kch;
     bool key_left = true;
-    while (message_file.get(mch) && key_left) {
-        if (!key_file.get(kch)) {
+    while (message_file.get(mch) && key_left) { // while we have message and key left
+        if (!key_file.get(kch)) { // if we can't read from the file
             std::cout << "Key too short:\nTry adding more data to the key or writing a shorter message.\n";
             key_left = false;
             std::remove(out_name);
@@ -57,9 +83,9 @@ int encrypt(Mode mode, char* message_name, char* key_name, char* out_name, bool 
             return 1;
         } else {
             if (enc) {
-                out_file.put(enc_ascii(mch, kch, false));
+                out_file.put(enc_byte(mch, kch, false));
             } else {
-                out_file.put(enc_ascii(mch, kch, true));
+                out_file.put(enc_byte(mch, kch, true));
             }
         }
     }
@@ -72,63 +98,63 @@ int encrypt(Mode mode, char* message_name, char* key_name, char* out_name, bool 
         std::rename(".keyfile.temp", key_name);
     }
     key_file.close();
-    message_file.close();
+    message_file.close(); // close our file streams for safety
     out_file.close();
-
     return 0;
 }
 
 int main(int argc, char** argv) {
-    int i = 1;
-    char* message_name;
-    char* key_name;
-    char* out_name;
-    char* seed_name;
-    Mode mode = UNSET;
-    bool enc = false;
-    bool del = false;
-    bool seed = false;
+    if (argc < 2) {
+        complain(UNSET);
+        return 1;
+    }
+    int i = 2; // current position from 0 to argc in argv
+    char* message_name = {0}; // path to the message file
+    char* key_name = {0}; // path to the key/seed file
+    char* out_name = {0}; // path to the desired output file
+    Mode mode;
+    bool enc = false; // decrypt by default
+    bool del = false; // save key data by default
+    bool seed = false; // read key as a seed instead of raw key data
+    switch (argv[1][0]) { // read the first argument as a mode
+        case 'b':
+            mode = BYTE;
+            break;
+        default:
+            complain(UNSET);
+            return 1;
+    }
     while (i < argc) { // loop until out of inputs
-        if (argv[i][0] == '-' && argv[i][1] == 'm' && argc > i+1) { // message file
-            ++i;
-            message_name = argv[i];
-        } else if (argv[i][0] == '-' && argv[i][1] == 'k' && argc > i+1) { // key file
-            ++i;
-            key_name = argv[i];
-        } else if (argv[i][0] == '-' && argv[i][1] == 'o' && argc > i+1) { // cyphertext file
-            ++i;
-            out_name = argv[i];
-        } else if (argv[i][0] == '-' && argv[i][1] == 'S' && argc > i+1) { // use seed in given file
-            ++i;
-            seed_name = argv[i];
-        } else if (argv[i][0] == '-' && argv[i][1] == 'e') { // encrypt option
-            enc = true;
-        } else if (argv[i][0] == '-' && argv[i][1] == 'd') { // delete option
-            del = true;
-        } else if (argv[i][0] == '-' && argv[i][1] == 's' && argc > i+1) { // set mode flag
-            ++i;
-            if (argv[i][0] == 's') { // set seed for future random keys
-                mode = SET_SEED;
-            } else if (argv[i][0] == 'a') {// normal set-key ascii mode
-                mode = ASCII;
-            }
+        if (argv[i][0] == '-') { // check for flags/options
+           if (argv[i][1] == 'm' && argc > i+1) { // message file
+               ++i;
+               message_name = argv[i];
+           } else if (argv[i][1] == 'k' && argc > i+1) { // key file
+               ++i;
+               key_name = argv[i];
+           } else if (argv[i][1] == 'o' && argc > i+1) { // cyphertext file
+               ++i;
+               out_name = argv[i];
+           } else if (argv[i][1] == 's') { // seed option
+               seed = true;
+           } else if (argv[i][1] == 'e') { // encrypt option
+               enc = true;
+           } else if (argv[i][1] == 'd') { // delete option
+               del = true;
+           }
         }
         ++i;
     }
 
-    if (mode == UNSET) { // if they didn't set a mode
-        std::cout << "Usage: otp [FLAGS, FILES, and OPTIONS]\n\nRequired flags:\n\
-\t-s (set mode), which takes the following options:\n\
-\t\ta\n\t\t\tSets the system to ASCII mode.\n\
-\t\ts\n\t\t\tSets the system to SET_SEED mode\n\
-\t\tu\n\t\t\tSets the system to USE_SEED mode\n\n\tASCII mode:\n\
-\t\t-m (message file)\n\t\t-k (key file)\n\t\t-o (output file)\n\nOptions:\n\
-\t-d\n\t\tDelete used key data\n\
-\t-e\n\t\tEncrypt the message, instead of the default decryption setting.\n";
-        return 1;
-    }
-    
-    if (mode == ASCII) {
-        return encrypt(mode, message_name, key_name, out_name, enc, del);
+    if (mode == BYTE) {
+        if (message_name == 0 || key_name == 0 || out_name == 0) {
+            int n = 0;
+            if (message_name == 0) n++;
+            if (key_name == 0) n++;
+            if (out_name == 0) n++;
+            complain(mode);
+            return n;
+        }
+        return encrypt(mode, message_name, key_name, out_name, enc, del, seed);
     }
 }
