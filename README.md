@@ -8,6 +8,7 @@ without access to the key used for encryption, given the following conditions:
 2. The key is as long as or longer than the message
 3. No part of the key is ever reused
 4. The data used for the key are truly random
+
 This program cannot enforce #1, #3, and #4, but it does require #2. The security of the cyphertext is left to
 the user, as the user is trusted above all else.
 
