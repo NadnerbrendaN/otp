@@ -27,6 +27,8 @@ void complain(Mode mode) { // send error message based on mode
             std::cout << "Usage: otp (mode) [FLAGS, FILES, and OPTIONS]\n\nMode possibilities:\n\
 \tbyte (or anything starting with 'b')\n\t\tSets the system to BYTE mode.\n\
 \tgen (or anything starting with 'g')\n\t\tSets the system to GEN mode.\n\
+\n\tGEN mode:\n\
+\tGenerates keys or seeds based on the arguments specified. This is a work in progress. It doesn't function.\n\
 \n\tBYTE mode:\n\
 \tEncrypts the provided message with the provided key (or seed) byte by byte. Required flags:\n\
 \t\t-m (message file)\n\t\t-k (key file)\n\t\t-o (output file)\n\nOptions:\n\
@@ -36,8 +38,6 @@ void complain(Mode mode) { // send error message based on mode
 \t\tThis will disable the delete option.\n\
 \t\tWARNING: This can significantly reduce the randomness of the key data, making the system less secure.\n\
 \t\tThis should be used only if absolute security is unnecessary.\n\
-\n\tGEN mode:\n\
-\tGenerates keys or seeds based on the arguments specified. This is a work in progress. It doesn't function.\n\
 ";
             break;
         case BYTE: // byte mode but one or more missing flags --> explain available flags
