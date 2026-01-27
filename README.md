@@ -4,8 +4,7 @@ This program allows for the provably secure encryption and decryption of arbitra
 an equal or greater quantity of data (the key). The file `main.cpp` is the main code file and `chacha.hpp`
 contains an algorithm needed to implement seeded random use. Whether or not it truly supplies the theoretical
 security of the OTP encryption scheme is untested, but realistically it should do so as long as an attacker
-only has access to the cyphertext. An attacker with access to your computer could likely read the message by
-reading the program's memory, but realistically they could do that anyway by reading the file it's coming from.
+only has access to the cyphertext.
 
 The [one-time pad](https://en.wikipedia.org/wiki/One-time_pad) (OTP) encryption scheme used is very simple,
 and it has also been mathematically proven to be unbreakable without access to the key used for encryption,
@@ -19,18 +18,18 @@ given the following conditions:
 If the above rules are followed, the cyphertext should be impossible to convert back to the original readable
 plaintext with any certainty. Follow those rules when using this program.
 
-The program cannot enforce #1, #3, and #4. It does require #2 in order to function, and the delete flag may
-assist with #3. In the end, the security of the system is left in the capable hands of the user. The program
-also offers a method to violate these rules in exchange for increased convenience by using the output of a 
-non-standard [ChaCha](https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant)-style
-[CSPRNG](https://en.wikipedia.org/wiki/CSPRNG) instead of user-supplied random data. This reduces the amount of
-user-supplied data necessary to encrypt the message, as the only data necessary is a 48-character seed from
-which to generate the true key data.
+The program cannot enforce #1, #3, and #4. It does require #2 in order to function, and the delete (`-d`)
+option may assist with #3. In the end, the security of the system is left in the capable hands of the user.
+The program also offers a method to violate several of these rules in exchange for increased convenience by
+using the output of a non-standard [ChaCha](https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant)-style
+[CSPRNG](https://en.wikipedia.org/wiki/CSPRNG) in place of user-supplied key data. This reduces the amount
+of communicated data necessary to encrypt the message, as the only data necessary is a 384-bit seed from
+which the true key data is generated.
 
 ### Compatibility
 I am unsure if the program will work on anything other than Linux with some GNU utilities, as that's what I
 run, ***but*** I don't know enough about Windows/Unix/etc to rule out compatibility. No matter the OS or any
-other context, no warranty or guarantees are provided for this program, as detailed in the LICENSE file.
+other context, no warranty is provided for this program. Read more in the `LICENSE` file.
 
 ### Planned features:
 - [x] Read, encrypt, and write byte-by-byte with precommunicated keys
@@ -53,8 +52,13 @@ Call the executable form without arguments for built-in help that is updated eve
 Calling the executable with a mode as the first argument and nothing else will give help for that mode.
 #### Simple overview:
 `otp byte` enters byte mode, where bytes are taken from the message, encrypted with bytes from the key, and
-written to the cyphertext. Specify the key with `-k (path/to/key_file)`, the input (message or cypher) with
-`-m (path/to/message_file)`, and output with `-o (path/to/output_file)`.
-Using the -e option specifies encryption as opposed to decryption. The -d option deletes used key data, and -s
+written to the cyphertext. Specify the key/seed with `-k path/to/key_file`, the input (message to encrypt or
+cypher to be decrypted) with `-m path/to/message_file`, and output with `-o path/to/output_file`. Using the
+`-e` option specifies encryption (decryption is the default). The `-d` option deletes used key data, and `-s`
 specifies that the key is to be used as a seed. Using the -s option will override -d, turning it off, due to
-the fact that deletion of data would be ineffective and simply lose the user's seed.
+the fact that deletion of data would be ineffective and simply lose the user's seed. In seed mode, the key
+file should contain up to 384 bits of data, preferably as unpredictable as possible, and the program will
+add a nonce to the end each time encryption is performed. If the file contains fewer than 48 bytes (384 bits),
+otp is supposed to pad it until it reaches that length. Currently, this is not happening, and the nonces
+stack up on the end until it reaches that length. I am happy with this, as it theoretically adds entropy to
+possibly insecure seeds.
