@@ -55,10 +55,11 @@ Calling the executable with a mode as the first argument and nothing else will g
 written to the cyphertext. Specify the key/seed with `-k path/to/key_file`, the input (message to encrypt or
 cypher to be decrypted) with `-m path/to/message_file`, and output with `-o path/to/output_file`. Using the
 `-e` option specifies encryption (decryption is the default). The `-d` option deletes used key data, and `-s`
-specifies that the key is to be used as a seed. Using the -s option will override -d, turning it off, due to
-the fact that deletion of data would be ineffective and simply lose the user's seed. In seed mode, the key
-file should contain up to 384 bits of data, preferably as unpredictable as possible, and the program will
-add a nonce to the end each time encryption is performed. If the file contains fewer than 48 bytes (384 bits),
-otp is supposed to pad it until it reaches that length. Currently, this is not happening, and the nonces
+specifies that the key is to be used as a seed. Using the `-s` option will override `-d`, turning it off, due
+to the fact that deletion of data would be ineffective and simply lose the user's seed. With the seed option,
+the key file should contain up to 384 bits of data, preferably as unpredictable as possible, to be used as a
+seed for the ChaCha-style CSPRNG. The program will update a nonce on the end of the file each time encryption
+is performed, so as to not reuse key data. If the file contains fewer than 48 bytes (384 bits), otp is
+supposed to pad it with 0s until it reaches that length. Currently, this is not happening, and the nonces
 stack up on the end until it reaches that length. I am happy with this, as it theoretically adds entropy to
-possibly insecure seeds.
+possibly insecure seeds, and it is still deterministic, thereby allowing multi-party communication to continue.
