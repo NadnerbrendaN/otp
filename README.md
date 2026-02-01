@@ -38,6 +38,10 @@ other context, no warranty is provided for this program. Read more in the `LICEN
 - [ ] UI?
 
 ### To install:
+There is a Makefile, so you can run `make` in the directory if you have `make` installed. This should build the
+executable form from the source code form. `make install` will copy the binary to `/bin/` and `make local` will
+copy the binary to `~/.local/bin/`. If these do not work for you or you do not have `make`, follow the
+instructions below.
 It is a few files of C++ code which only rely on each other and on the standard library, so it should be
 straightforward to compile once you acquire the code.
 Here is how I compile it using GCC (but of course you can do it however you want):
