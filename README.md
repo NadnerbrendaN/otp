@@ -1,10 +1,11 @@
 # otp
 ### A one-time pad encryption and decryption system
 This program allows for the provably secure encryption and decryption of arbitrary data (the message) using
-an equal or greater quantity of data (the key). The file `main.cpp` is the main code file and `chacha.hpp`
-contains an algorithm needed to implement seeded random use. Whether or not it truly supplies the theoretical
-security of the OTP encryption scheme is untested, but realistically it should do so as long as an attacker
-only has access to the cyphertext.
+an equal or greater quantity of data (the key). The file `main.cpp` has the main function, `otp.cpp` is the
+primary file containing most of the logic and code for encryption, and `chacha.cpp` contains an algorithm
+needed to implement seeded random use. Whether or not it truly supplies the theoretical security of the OTP
+encryption scheme is untested, but realistically it should do so as long as an attacker only has access to
+the cyphertext.
 
 The [one-time pad](https://en.wikipedia.org/wiki/One-time_pad) (OTP) encryption scheme used is very simple,
 and it has also been mathematically proven to be unbreakable without access to the key used for encryption,
@@ -54,16 +55,5 @@ then running it).
 ### To run:
 Call the executable form without arguments for built-in help that is updated every time a feature is.
 Calling the executable with a mode as the first argument and nothing else will give help for that mode.
-#### Simple overview:
-`otp byte` enters byte mode, where bytes are taken from the message, encrypted with bytes from the key, and
-written to the cyphertext. Specify the key/seed with `-k path/to/key_file`, the input (message to encrypt or
-cypher to be decrypted) with `-m path/to/message_file`, and output with `-o path/to/output_file`. Using the
-`-e` option specifies encryption (decryption is the default). The `-d` option deletes used key data, and `-s`
-specifies that the key is to be used as a seed. Using the `-s` option will override `-d`, turning it off, due
-to the fact that deletion of data would be ineffective and simply lose the user's seed. With the seed option,
-the key file should contain up to 384 bits of data, preferably as unpredictable as possible, to be used as a
-seed for the ChaCha-style CSPRNG. The program will update a nonce on the end of the file each time encryption
-is performed, so as to not reuse key data. If the file contains fewer than 48 bytes (384 bits), otp is
-supposed to pad it with 0s until it reaches that length. Currently, this is not happening, and the nonces
-stack up on the end until it reaches that length. I am happy with this, as it theoretically adds entropy to
-possibly insecure seeds, and it is still deterministic, thereby allowing multi-party communication to continue.
+Running an improper command will, in general, not cause any harm such as deleting data, so it is safe
+to try things out and run incomplete commands to learn one's way around the system by using it.

@@ -1,4 +1,4 @@
-otp: main.cpp chacha.hpp
+otp: main.cpp chacha.cpp otp.cpp
 	g++ main.cpp -o otp
 
 install: otp

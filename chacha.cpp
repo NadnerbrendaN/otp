@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 NadnerbrendaN <albertdock@duck.com>
  *
- * An implementation of the ChaCha20 cipher, made for NadnerbrendaN's "otp" project.
+ * A non-standard implementation of a ChaCha-style cipher
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *  If you did not recieve a copy of the MPL-2.0 with this source code, please contact the author

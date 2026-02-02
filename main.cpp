@@ -11,9 +11,8 @@
 
 #include <cstdio>
 #include <fstream>
-#include <cstdint>
 #include <iostream>
-#include "chacha.hpp"
+#include "otp.cpp"
 
 enum Mode { // available options for the running mode
     UNSET,
@@ -52,140 +51,6 @@ void complain(Mode mode) { // send error message based on mode
     }
 }
 
-char enc_byte(char m, char k, bool e) { // encrypt one byte with another byte
-    if (e) { // switch add/sub based on encrypt/decrypt
-        return m+k;
-    } else {
-        return m-k;
-    }
-}
-
-int encrypt(Mode mode, char* message_name, char* key_name, char* out_name, bool enc, bool del, bool seed) {
-    std::ifstream message_file; // a file input stream from which to read the message
-    std::ifstream key_file; // a file input stream from which to read the key/seed
-    std::ofstream out_file; // a file output stream to write the cyphertext to
-    message_file.open(message_name);
-    key_file.open(key_name);
-    out_file.open(out_name);
-    int code = 0; // the error code to return
-    /* 
-     * I'm doing it this way so I can call functions that return error codes and then pass those
-     * upstream without just immediately giving up and returning the code, so that I have time to
-     * clean up or perform other tasks before erroring.
-     */
-    if (!message_file.is_open() || !key_file.is_open() || !out_file.is_open()) { // catch missing files
-        if (!message_file.is_open()) {
-            std::cout << "File not found: " << message_name << '\n';
-            code++;
-        }
-        if (!key_file.is_open()) {
-            std::cout << "File not found: " << key_name << '\n';
-            code++;
-        }
-        if (!out_file.is_open()) code++; // (I think this technically shouldn't happen but whatever)
-        message_file.close();
-        key_file.close(); // close all files for propriety
-        out_file.close();
-        std::remove(out_name);
-        return code;
-    }
-
-    if (mode == BYTE && !seed) {
-        char mch;
-        char kch;
-        bool key_left = true;
-        while (message_file.get(mch) && key_left) { // while we have message and key left
-            if (!key_file.get(kch)) { // if we can't read from the file
-                std::cout << "Key too short:\n\
-                    Try adding more data to the key or writing a shorter message.\n";
-                key_left = false;
-                std::remove(out_name);
-                key_file.close();
-                message_file.close();
-                out_file.close();
-                return 1;
-            } else {
-                out_file.put(enc_byte(mch, kch, enc));
-            }
-        }
-        if (key_left && del) {
-            std::ofstream temp_key(".keyfile.temp");
-            while (key_file.get(kch)) {
-                temp_key.put(kch);
-            }
-            temp_key.close();
-            std::rename(".keyfile.temp", key_name);
-        }
-    } else if (mode == BYTE && seed) {
-        char sch;
-        int count = 0;
-        std::uint32_t seed_data[16] = {0};
-        while (key_file.get(sch) && count < 48) {
-            seed_data[2 + (count / 4)] += (((std::uint32_t) sch) << ((count % 4) * 8));
-            ++count;
-            if (key_file.peek() == -1) {
-                key_file.seekg(0);
-                break;
-            }
-        }
-        if (count < 48) {
-            std::ofstream temp_key(".keyfile.temp");
-            char kch;
-            while (key_file.peek() != -1 && key_file.get(kch)) {
-                temp_key.put(kch);
-            }
-            for (int i = count; i < 48; ++i) {
-                temp_key.put(0x00);
-            }
-            temp_key.close();
-            std::rename(".keyfile.temp", key_name);
-        } else {
-            key_file.seekg(48);
-            std::uint32_t nonce = 0;
-            count = 0;
-            char kch;
-            while (key_file.peek() != -1 && key_file.get(kch) && count < 4) {
-                nonce += (kch << (count * 8));
-                ++count;
-            }
-            seed_data[14] = nonce;
-        }
-        std::uint32_t out[16];
-        char mch;
-        bool run = true;
-        while (run) {
-            chacha(out, seed_data);
-            for (int i = 0; i < 16; ++i) {
-                for (int k = 0; k < 4; ++k) {
-                    if (run && message_file.get(mch)) {
-                        out_file.put(enc_byte(mch, (out[i] >> k*8) % 256, enc));
-                    } else {
-                        run = false;
-                        break;
-                    }
-                }
-            }
-            ++seed_data[15];
-        }
-        key_file.seekg(0);
-        std::ofstream temp_key(".keyfile.temp");
-        char kch;
-        count = 0;
-        while (key_file.get(kch) && count < 48) {
-            temp_key.put(kch);
-            ++count;
-        }
-        temp_key.put(out[14] % 256);
-        temp_key.put((out[14] >> 8) % 256);
-        temp_key.put((out[14] >> 16) % 256);
-        temp_key.put((out[14] >> 24) % 256);
-        temp_key.close();
-        std::rename(".keyfile.temp", key_name);
-    }
-
-    return 0;
-}
-
 int main(int argc, char** argv) {
     if (argc < 2) {
         complain(UNSET);
@@ -210,38 +75,41 @@ int main(int argc, char** argv) {
             complain(UNSET);
             return 1;
     }
+
     while (i < argc) { // loop until out of inputs
         if (argv[i][0] == '-') { // check for flags/options
-           if (argv[i][1] == 'm' && argc > i+1) { // message file
-               ++i;
-               message_name = argv[i];
-           } else if (argv[i][1] == 'k' && argc > i+1) { // key file
-               ++i;
-               key_name = argv[i];
-           } else if (argv[i][1] == 'o' && argc > i+1) { // cyphertext file
-               ++i;
-               out_name = argv[i];
-           } else if (argv[i][1] == 's') { // seed option
-               seed = true;
-               del = false;
-           } else if (argv[i][1] == 'e') { // encrypt option
-               enc = true;
-           } else if (argv[i][1] == 'd' && !seed) { // delete option
-               del = true;
-           }
+            if (argv[i][1] == 'm' && argc > i+1) { // message file
+                ++i;
+                message_name = argv[i];
+            } else if (argv[i][1] == 'k' && argc > i+1) { // key file
+                ++i;
+                key_name = argv[i];
+            } else if (argv[i][1] == 'o' && argc > i+1) { // cyphertext file
+                ++i;
+                out_name = argv[i];
+            } else if (argv[i][1] == 's') { // seed option
+                seed = true;
+            } else if (argv[i][1] == 'e') { // encrypt option
+                enc = true;
+            } else if (argv[i][1] == 'd') { // delete option
+                del = true;
+            } else {
+                std::cout << "Unknown flag or option: -" << argv[i][0] << "\n";
+                return 2;
+            }
         }
         ++i;
     }
 
     if (mode == BYTE) {
         if (message_name == 0 || key_name == 0 || out_name == 0) {
-            int n = 0;
-            if (message_name == 0) n++;
-            if (key_name == 0) n++;
-            if (out_name == 0) n++;
-            complain(mode);
-            return n;
+            complain(BYTE);
+            return 3;
         }
-        return encrypt(mode, message_name, key_name, out_name, enc, del, seed);
+        if (!seed) {
+            return unseeded_byte(message_name, key_name, out_name, enc, del);
+        } else {
+            return seeded_byte(message_name, key_name, out_name, enc);
+        }
     }
 }
