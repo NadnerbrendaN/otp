@@ -1,7 +1,8 @@
 /*
  * Copyright (C) 2026 NadnerbrendaN <albertdock@duck.com>
  *
- * The main source file for NadnerbrendaN's "otp" project, implementing one time pad encryption.
+ * The primary file containing encryption and decryption logic for one time pads and a stream
+ * cipher
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *  If you did not recieve a copy of the MPL-2.0 with this source code, please contact the author
