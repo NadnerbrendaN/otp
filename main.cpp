@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2026 NadnerbrendaN <albertdock@duck.com>
  *
- * A simple CLI to that allows users to encrypt and decrypt files using one time pads and a
+ * A simple CLI to that allows users to encrypt and decrypt files using one time pads or a
  * stream cipher.
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
