@@ -1,11 +1,11 @@
-otp: main.cpp chacha.cpp otp.cpp
-	g++ main.cpp -o otp
+cli: src/main.cpp src/chacha.cpp src/otp.cpp
+	g++ src/main.cpp -o otp
 
 install: otp
 	sudo cp ./otp /bin/
 
 local: otp
-	sudo cp ./otp ~/.local/bin/
+	cp ./otp ~/.local/bin/
 
-clean:
+clean: otp
 	rm otp
