@@ -18,7 +18,6 @@
 enum Mode { // available options for the running mode
     UNSET,
     BYTE,
-    GEN,
 };
 
 void complain(Mode mode) { // send error message based on mode
@@ -26,9 +25,6 @@ void complain(Mode mode) { // send error message based on mode
         case UNSET: // no given mode --> explain that a mode is needed
             std::cout << "Usage: otp (mode) [FLAGS, FILES, and OPTIONS]\n\nMode possibilities:\n\
 \tbyte (or anything starting with 'b')\n\t\tSets the system to BYTE mode.\n\
-\tgen (or anything starting with 'g')\n\t\tSets the system to GEN mode.\n\
-\n\tGEN mode:\n\
-\tGenerates keys or seeds based on the arguments specified. This is a work in progress. It doesn't function.\n\
 \n\tBYTE mode:\n\
 \tEncrypts the provided message with the provided key (or seed) byte by byte. Required flags:\n\
 \t\t-m (message file)\n\t\t-k (key file)\n\t\t-o (output file)\n\nOptions:\n\
@@ -45,9 +41,6 @@ void complain(Mode mode) { // send error message based on mode
 \t-m (message file)\n\t-k (key file)\n\t-o (output file)\n\nOptions:\n\
 \t-d\n\t\tDelete used key data\n\
 \t-e\n\t\tEncrypt the message, instead of the default decryption setting.\n";
-            break;
-        case GEN:
-            std::cout << "This mode is as of yet undefined. It will randomly generate data or keys.\n";
             break;
     }
 }
@@ -68,9 +61,6 @@ int main(int argc, char** argv) {
     switch (argv[1][0]) { // read the first argument as a mode
         case 'b':
             mode = BYTE;
-            break;
-        case 'g':
-            mode = GEN;
             break;
         default:
             complain(UNSET);
