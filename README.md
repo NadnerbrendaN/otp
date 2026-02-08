@@ -44,8 +44,9 @@ other context, no warranty is provided for this program. Read more in the `LICEN
 ### Planned features:
 - [x] Read, encrypt, and write byte-by-byte with precommunicated keys
 - [x] Seeded encryption using the ChaCha cipher for much-less-secure but much-more-convenient communication
-- [ ] Support for other block sizes or processes?
 - [ ] UI?
+- [ ] GEN mode to make random keys and seeds
+- [ ] Support for other block sizes or processes?
 
 ### To install:
 There is a Makefile, so you can run `make` in the directory if you have `make` installed. This should build the
