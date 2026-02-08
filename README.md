@@ -27,6 +27,11 @@ needed to implement seeded random use. Whether or not *otp* truly supplies the t
 OTP encryption scheme is untested, but realistically it should do so as long as an attacker only has access
 to the cyphertext.
 
+Everything inside the `gui/` subdirectory is related to the GTK GUI, which requires gtkmm-4.0 and supporting
+libraries to build. Build instructions are not included, as it significantly depends on your OS and build
+context. Everything else is a few simple c++ files without external dependencies, so I kept all the GTK
+things very separate.
+
 Typically, *otp* reads files one byte at a time and then encrypts each byte in the message file with one
 from the key file. When used with the seed flag, the key is read as a seed for a
 [ChaCha](https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant)-style
@@ -44,17 +49,24 @@ other context, no warranty is provided for this program. Read more in the `LICEN
 ### Planned features:
 - [x] Read, encrypt, and write byte-by-byte with precommunicated keys
 - [x] Seeded encryption using the ChaCha cipher for much-less-secure but much-more-convenient communication
-- [ ] Support for other block sizes or processes?
 - [ ] UI?
+- [ ] Support for other block sizes or processes?
 
 ### To install:
-There is a Makefile, so you can run `make` in the directory if you have `make` installed. This should build the
+The CLI is currently the primary easily-buildable form of *otp*. The GUI (built with GTK) requires `gtkmm-4.0`
+and there will not be Makefile support for it, as it is heavily context-dependent, requiring specified paths
+for include directories. These can be found using `pkg-config`, but that cannot be automated in the `Makefile`
+due to differences in shell syntax. If you want the GUI, use a pre-built binary or build it on your own
+machine.
+
+There is a `Makefile`, so you can run `make` in the directory if you have `make` installed. This should build the
 executable form from the source code form. `make install` will copy the binary to `/bin/` and `make local` will
 copy the binary to `~/.local/bin/`. If these do not work for you or you do not have `make`, follow the
 instructions below.
 
-The program is a few files of C++ code which only rely on each other and on the standard library, so it should
-be straightforward to compile once you acquire the code.
+*otp* is primarily a few files of C++ code which only rely on each other and on the standard library, so it
+should be straightforward to compile once you acquire the code. This applies to the CLI only. As mentioned above,
+the GUI is more complex.
 
 Here is how I compile it using GCC (but of course you can do it however you want):
 ```shell
@@ -64,6 +76,8 @@ After that, it's just a matter of running the executable (or moving it to a dire
 then running it).
 
 ### To run:
+The GUI should be self-explanatory, and the CLI tries to be as well. For CLI:
+
 Call the executable form without arguments for built-in help that is updated every time a feature is.
 Calling the executable with a mode as the first argument and nothing else will give help for that mode.
 

@@ -1,8 +1,7 @@
 /*
  * Copyright (C) 2026 NadnerbrendaN <albertdock@duck.com>
  *
- * A GTK GUI that allows users to encrypt and decrypt files using one time pads or a stream
- * cipher
+ * The main function that runs window.hpp and window.cpp stuff
  *
  *  This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
  *  If you did not recieve a copy of the MPL-2.0 with this source code, please contact the author
@@ -11,16 +10,10 @@
  */
 
 #include "window.hpp"
+#include <gtkmm/application.h>
 
-OtpWindow::OtpWindow()
-{
-  set_title("otp");
-  set_default_size(640, 480);
-}
+int main(int argc, char** argv) {
+    auto app = Gtk::Application::create("org.nadnerbrendan.otp");
 
-int main(int argc, char** argv)
-{
-  auto app = Gtk::Application::create("org.nadnerbrendan.otp");
-
-  return app->make_window_and_run<OtpWindow>(argc, argv);
+    return app->make_window_and_run<OtpWindow>(argc, argv);
 }
