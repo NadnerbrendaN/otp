@@ -14,36 +14,26 @@
 #include <fstream>
 #include <cstdint>
 #include <iostream>
-#include "chacha.cpp"
+#include "otp.hpp"
+#include "chacha.hpp"
 
-char enc_byte(char m, char k, bool e) { // encrypt one byte with another byte
-    if (e) { // switch add/sub based on encrypt/decrypt
-        return m+k;
-    } else {
-        return m-k;
-    }
-}
-
-int unseeded_byte(char* message_name, char* key_name, char* out_name, bool enc, bool del) {
-    std::ifstream message_file; // a file input stream from which to read the message
-    std::ifstream key_file; // a file input stream from which to read the key
-    std::ofstream out_file; // a file output stream to write the cyphertext to
+int unseeded_byte(char* message_name, char* key_name, char* out_name, bool del) {
+    std::ifstream message_file;
+    std::ifstream key_file;
+    std::ofstream out_file;
     message_file.open(message_name);
     key_file.open(key_name);
     out_file.open(out_name);
-    if (!message_file.is_open() || !key_file.is_open() || !out_file.is_open()) { // catch missing files
-        if (!message_file.is_open()) {
-            std::cout << "File not found: " << message_name << '\n';
-            return 4;
-        }
-        if (!key_file.is_open()) {
-            std::cout << "File not found: " << key_name << '\n';
-            return 5;
-        }
-        if (!out_file.is_open()) return 5; // (I think this technically shouldn't happen but whatever)
+    if (!message_file.is_open()) {
+        std::cout << "File not found: " << message_name << '\n';
+        return 4;
     }
+    if (!key_file.is_open()) {
+        std::cout << "File not found: " << key_name << '\n';
+        return 5;
+    }
+    if (!out_file.is_open()) return 5; // (I think this technically shouldn't happen but whatever)
 
-    int code = 0;
     char mch;
     char kch;
     bool key_left = true;
@@ -58,7 +48,7 @@ int unseeded_byte(char* message_name, char* key_name, char* out_name, bool enc, 
             out_file.close();
             return 1;
         } else {
-            out_file.put(enc_byte(mch, kch, enc));
+            out_file.put(mch ^ kch);
         }
     }
     if (key_left && del) {
@@ -72,7 +62,7 @@ int unseeded_byte(char* message_name, char* key_name, char* out_name, bool enc, 
     return 0;
 }
 
-int seeded_byte(char* message_name, char* seed_name, char* out_name, bool enc) {
+int seeded_byte(char* message_name, char* seed_name, char* out_name) {
     std::ifstream message_file; // a file input stream from which to read the message
     std::ifstream seed_file; // a file input stream from which to read the seed
     std::ofstream out_file; // a file output stream to write the cyphertext to
@@ -131,7 +121,7 @@ int seeded_byte(char* message_name, char* seed_name, char* out_name, bool enc) {
         for (int i = 0; i < 16; ++i) {
             for (int k = 0; k < 4; ++k) {
                 if (run && message_file.get(mch)) {
-                    out_file.put(enc_byte(mch, (out[i] >> k*8) % 256, enc));
+                    out_file.put(mch ^ ((out[i] >> k*8) % 256));
                 } else {
                     run = false;
                     break;
