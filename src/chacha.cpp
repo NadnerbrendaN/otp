@@ -13,6 +13,7 @@
 // non-standard constants because I wanted to do it this way
 constexpr std::uint32_t CHA_CONST_0 = 0x6c756e61;
 constexpr std::uint32_t CHA_CONST_1 = 0xC4AC4A20;
+constexpr int ROUNDS = 20; 
 
 std::uint32_t rotl(std::uint32_t num, std::uint32_t shift) {
     return ((num << shift) | (num >> (32 - shift)));
@@ -35,7 +36,7 @@ void chacha(std::uint32_t* out, std::uint32_t* in) {
         x[i] = in[i];
     }
 
-    for (int i = 0; i < 20; ++i) {
+    for (int i = 0; i < ROUNDS/2; ++i) {
         qr(x[0], x[4], x[8], x[12]);
         qr(x[1], x[5], x[9], x[13]);
         qr(x[2], x[6], x[10], x[14]);
