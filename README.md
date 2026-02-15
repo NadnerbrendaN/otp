@@ -20,12 +20,14 @@ the program cannot enforce rules #1, #3, and #4. It does require #2 in order to 
 In the end, **the security of the system is left in the capable hands of the user.**
 
 ### Structure
+All source files are in the `src` directory.
+
 The file `main.cpp` hosts the main function, which makes a simple command line interface for the rest of the
 program. If you want a different interface to it, only `main.cpp` needs to be changed. `otp.cpp` is the
 primary file containing most of the logic and code for encryption, and `chacha.cpp` contains an algorithm
-needed to implement seeded random use. Whether or not *otp* truly supplies the theoretical security of the
-OTP encryption scheme is untested, but realistically it should do so as long as an attacker only has access
-to the cyphertext.
+needed to implement seeded random use. All `*.hpp` files are just headers for the relevant `*.cpp` file.
+Whether or not *otp* truly supplies the theoretical security of the OTP encryption scheme is untested, but
+realistically it should do so as long as an attacker only has access to the cyphertext.
 
 Typically, *otp* reads files one byte at a time and then encrypts each byte in the message file with one
 from the key file. When used with the seed flag, the key is read as a seed for a
@@ -44,7 +46,7 @@ other context, no warranty is provided for this program. Read more in the `LICEN
 ### Planned features:
 - [x] Read, encrypt, and write byte-by-byte with precommunicated keys
 - [x] Seeded encryption using the ChaCha cipher for much-less-secure but much-more-convenient communication
-- [ ] UI?
+- [ ] UI
 - [ ] GEN mode to make random keys and seeds
 - [ ] Support for other block sizes or processes?
 
@@ -59,7 +61,7 @@ be straightforward to compile once you acquire the code.
 
 Here is how I compile it using GCC (but of course you can do it however you want):
 ```shell
-g++ main.cpp -o otp
+g++ src/main.cpp src/otp.cpp src/chacha.cpp -o otp
 ```
 After that, it's just a matter of running the executable (or moving it to a directory for program binaries, and
 then running it).

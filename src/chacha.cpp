@@ -10,6 +10,10 @@
  */
 #include "chacha.hpp"
 
+// non-standard constants because I wanted to do it this way
+constexpr std::uint32_t CHA_CONST_0 = 0x6c756e61;
+constexpr std::uint32_t CHA_CONST_1 = 0xC4AC4A20;
+
 std::uint32_t rotl(std::uint32_t num, std::uint32_t shift) {
     return ((num << shift) | (num >> (32 - shift)));
 }
@@ -21,7 +25,7 @@ void qr(std::uint32_t &a, std::uint32_t &b, std::uint32_t &c, std::uint32_t &d) 
     c += d; b ^= c; d = rotl(b, 7);
 }
 
-void chacha(std::uint32_t *out, const std::uint32_t *in) {
+void chacha(std::uint32_t* out, std::uint32_t* in) {
     std::uint32_t x[16];
 
     x[0] = CHA_CONST_0;

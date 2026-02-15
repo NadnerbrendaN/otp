@@ -12,27 +12,25 @@
 
 #include <cstdio>
 #include <fstream>
+#include <cstring>
 #include <cstdint>
 #include <iostream>
 #include "otp.hpp"
 #include "chacha.hpp"
 
 int unseeded_byte(char* message_name, char* key_name, char* out_name, bool del) {
-    std::ifstream message_file;
-    std::ifstream key_file;
-    std::ofstream out_file;
-    message_file.open(message_name);
-    key_file.open(key_name);
-    out_file.open(out_name);
+    std::ifstream message_file(message_name);
+    std::ifstream key_file(key_name);
+    std::ofstream out_file(out_name);
     if (!message_file.is_open()) {
         std::cout << "File not found: " << message_name << '\n';
-        return 4;
+        return 1;
     }
     if (!key_file.is_open()) {
         std::cout << "File not found: " << key_name << '\n';
-        return 5;
+        return 1;
     }
-    if (!out_file.is_open()) return 5; // (I think this technically shouldn't happen but whatever)
+    if (!out_file.is_open()) return -1; // (I think this technically shouldn't happen but whatever)
 
     char mch;
     char kch;
@@ -63,86 +61,49 @@ int unseeded_byte(char* message_name, char* key_name, char* out_name, bool del) 
 }
 
 int seeded_byte(char* message_name, char* seed_name, char* out_name) {
-    std::ifstream message_file; // a file input stream from which to read the message
-    std::ifstream seed_file; // a file input stream from which to read the seed
-    std::ofstream out_file; // a file output stream to write the cyphertext to
-    message_file.open(message_name);
-    seed_file.open(seed_name);
-    out_file.open(out_name);
-    if (!message_file.is_open() || !seed_file.is_open() || !out_file.is_open()) { // catch missing files
-        if (!message_file.is_open()) {
-            std::cout << "File not found: " << message_name << '\n';
-            return 4;
-        }
-        if (!seed_file.is_open()) {
-            std::cout << "File not found: " << seed_name << '\n';
-            return 5;
-        }
-        if (!out_file.is_open()) return 5; // (I think this technically shouldn't happen but whatever)
+    std::ifstream message_file(message_name);
+    std::ifstream seed_file(seed_name);
+    std::ofstream out_file(out_name);
+    if (!message_file.is_open()) {
+        std::cout << "File not found: " << message_name << '\n';
+        return 1;
     }
+    if (!seed_file.is_open()) {
+        std::cout << "File not found: " << seed_name << '\n';
+        return 1;
+    }
+    if (!out_file.is_open()) return -1; // (I think this technically shouldn't happen but whatever)
 
-    char sch;
     int count = 0;
-    std::uint32_t seed_data[16] = {0};
-    while (seed_file.get(sch) && count < 48) {
-        seed_data[2 + (count / 4)] += (((std::uint32_t) sch) << ((count % 4) * 8));
+    char seed_data[48] = {0};
+    while (seed_file.get(seed_data[2 + count]) && count < 48) {
         ++count;
-        if (seed_file.peek() == -1) {
-            seed_file.seekg(0);
-            break;
-        }
     }
-    if (count < 48) {
-        std::ofstream temp_key(".seed.temp");
-        while (seed_file.peek() != -1 && seed_file.get(sch)) {
-            temp_key.put(sch);
-        }
-        for (int i = count; i < 48; ++i) {
-            temp_key.put(0x00);
-        }
-        temp_key.close();
-        std::rename(".seed.temp", seed_name);
-    } else {
-        seed_file.seekg(48);
-        std::uint32_t nonce = 0;
-        count = 0;
-        sch = 0;
-        while (seed_file.peek() != -1 && seed_file.get(sch) && count < 4) {
-            nonce += (sch << (count * 8));
-            ++count;
-        }
-        seed_data[14] = nonce;
-    }
-    std::uint32_t out[16];
+    seed_file.close();
     char mch;
-    bool run = true;
-    while (run) {
-        chacha(out, seed_data);
+    std::uint32_t input[16] = {0};
+    std::memcpy(input, seed_data, 48);
+    std::uint32_t out[16] = {0};
+    while (true) {
+        chacha(out, input);
         for (int i = 0; i < 16; ++i) {
             for (int k = 0; k < 4; ++k) {
-                if (run && message_file.get(mch)) {
+                if (message_file.get(mch)) {
                     out_file.put(mch ^ ((out[i] >> k*8) % 256));
                 } else {
-                    run = false;
-                    break;
+                    goto end_loops;
                 }
             }
         }
-        ++seed_data[15];
+        ++input[15];
     }
-    seed_file.seekg(0);
-    std::ofstream temp_key(".seed.temp");
-    sch = 0;
-    count = 0;
-    while (seed_file.get(sch) && count < 48) {
-        temp_key.put(sch);
-        ++count;
-    }
-    temp_key.put(out[14] % 256);
-    temp_key.put((out[14] >> 8) % 256);
-    temp_key.put((out[14] >> 16) % 256);
-    temp_key.put((out[14] >> 24) % 256);
-    temp_key.close();
-    std::rename(".seed.temp", seed_name);
+end_loops:
+    std::ofstream seed_out(seed_name, std::ios_base::app); // open in append mode
+    seed_out.seekp(48);
+    seed_out.put(out[14] % 256);
+    seed_out.put((out[14] >> 8) % 256);
+    seed_out.put((out[14] >> 16) % 256);
+    seed_out.put((out[14] >> 24) % 256);
+    seed_out.close();
     return 0;
 }

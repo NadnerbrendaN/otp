@@ -12,8 +12,4 @@
 
 #include <cstdint>
 
-// non-standard constants because I wanted to do it this way
-constexpr std::uint32_t CHA_CONST_0 = 0x6c756e61;
-constexpr std::uint32_t CHA_CONST_1 = 0xC4AC4A20;
-
-void chacha(std::uint32_t *out, const std::uint32_t *in);
+void chacha(std::uint32_t* out, std::uint32_t* in);

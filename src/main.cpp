@@ -10,7 +10,6 @@
  *  to obtain a copy of the license text.
  */
 
-#include <cstdio>
 #include <iostream>
 #include "otp.hpp"
 
@@ -28,19 +27,15 @@ void complain(Mode mode) { // send error message based on mode
 \tEncrypts the provided message with the provided key (or seed) byte by byte. Required flags:\n\
 \t\t-m (message file)\n\t\t-k (key file)\n\t\t-o (output file)\n\nOptions:\n\
 \t-d\n\t\tDelete used key data. Incompatible with the seed option.\n\
-\t-e\n\t\tEncrypt the message, instead of the default decryption setting.\n\
 \t-s\n\t\tIndicate that the key is to be used as a seed for a ChaCha cipher.\n\
 \t\tThis will disable the delete option.\n\
 \t\tWARNING: This can significantly reduce the randomness of the key data, making the system less secure.\n\
-\t\tThis should be used only if absolute security is unnecessary.\n\
-";
+\t\tThis should be used only if absolute security is unnecessary.\n";
             break;
         case BYTE:
             std::cout << "BYTE mode requires these flags:\n\
 \t-m (message file)\n\t-k (key file)\n\t-o (output file)\n\nOptions:\n\
-\t-d\n\t\tDelete used key data\n\
-\t-e\n\t\tEncrypt the message, instead of the default decryption setting.\n";
-            break;
+\t-d\n\t\tDelete used key data\n";
     }
 }
 
@@ -54,7 +49,6 @@ int main(int argc, char** argv) {
     char* key_name = {0};
     char* out_name = {0};
     Mode mode;
-    bool enc = false; // decrypt by default
     bool del = false; // save key data by default
     bool seed = false; // do not read key as a seed by default
     switch (argv[1][0]) { // read the first argument as a mode
@@ -79,13 +73,11 @@ int main(int argc, char** argv) {
                 out_name = argv[i];
             } else if (argv[i][1] == 's') {
                 seed = true;
-            } else if (argv[i][1] == 'e') {
-                enc = true;
             } else if (argv[i][1] == 'd') {
                 del = true;
             } else {
                 std::cout << "Unknown flag or option: -" << argv[i][1] << "\n";
-                return 2;
+                return 1;
             }
         }
         ++i;
@@ -94,7 +86,7 @@ int main(int argc, char** argv) {
     if (mode == BYTE) {
         if (message_name == 0 || key_name == 0 || out_name == 0) {
             complain(BYTE);
-            return 3;
+            return 1;
         }
         if (!seed) {
             return unseeded_byte(message_name, key_name, out_name, del);
