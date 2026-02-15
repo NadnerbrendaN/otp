@@ -29,6 +29,7 @@ void complain(Mode mode) { // send error message based on mode
 \t-d\n\t\tDelete used key data. Incompatible with the seed option.\n\
 \t-s\n\t\tIndicate that the key is to be used as a seed for a ChaCha cipher.\n\
 \t\tThis will disable the delete option.\n\
+\t\tThe key can be up to 320 bits long (40 bytes)\n\
 \t\tWARNING: This can significantly reduce the randomness of the key data, making the system less secure.\n\
 \t\tThis should be used only if absolute security is unnecessary.\n";
             break;

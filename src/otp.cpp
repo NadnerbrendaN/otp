@@ -76,12 +76,12 @@ int seeded_byte(char* message_name, char* seed_name, char* out_name) {
 
     int count = 0;
     char seed_data[48] = {0};
-    while (seed_file.get(seed_data[2 + count]) && count < 48) {
+    while (seed_file.get(seed_data[count]) && count < 48) {
         ++count;
     }
     seed_file.close();
     char mch;
-    std::uint32_t input[16] = {0};
+    std::uint32_t input[14] = {0};
     std::memcpy(input, seed_data, 48);
     std::uint32_t out[16] = {0};
     while (true) {
@@ -95,11 +95,13 @@ int seeded_byte(char* message_name, char* seed_name, char* out_name) {
                 }
             }
         }
-        ++input[15];
+        ++input[13];
     }
 end_loops:
-    std::ofstream seed_out(seed_name, std::ios_base::app); // open in append mode
-    seed_out.seekp(48);
+    std::ofstream seed_out(seed_name); // don't overwrite the file
+    for (int i = 0; i < 40; ++i) {
+        seed_out.put(seed_data[i]);
+    }
     seed_out.put(out[14] % 256);
     seed_out.put((out[14] >> 8) % 256);
     seed_out.put((out[14] >> 16) % 256);

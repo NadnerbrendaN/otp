@@ -33,8 +33,8 @@ Typically, *otp* reads files one byte at a time and then encrypts each byte in t
 from the key file. When used with the seed flag, the key is read as a seed for a
 [ChaCha](https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant)-style
 [CSPRNG](https://en.wikipedia.org/wiki/CSPRNG) instead of a key to be directly used. This reduces the amount
-of communicated data necessary to encrypt the message, as the only data necessary is a 384-bit seed from
-which the true key data is generated. As mentioned earlier, this does reduce security, but *otp* is much
+of communicated data necessary to encrypt the message, as the only data necessary is a 320-bit (40 byte) seed
+from which the true key data is generated. As mentioned earlier, this does reduce security, but *otp* is much
 easier to use when the key can be a short passphrase or data sequence instead of a massive pile of data
 larger than the total length of the messages one wants to send.
 

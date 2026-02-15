@@ -32,8 +32,8 @@ void chacha(std::uint32_t* out, std::uint32_t* in) {
     x[0] = CHA_CONST_0;
     x[1] = CHA_CONST_1;
 
-    for (int i = 0; i < 16; ++i) {
-        x[i] = in[i];
+    for (int i = 0; i < 14; ++i) {
+        x[i + 2] = in[i];
     }
 
     for (int i = 0; i < ROUNDS/2; ++i) {
