@@ -10,6 +10,6 @@
  *  to obtain a copy of the license text.
  */
 
-int unseeded_byte(char* message_name, char* key_name, char* out_name, bool del);
+int unseeded_byte(const char* message_name, const char* key_name, const char* out_name, bool del);
 
-int seeded_byte(char* message_name, char* seed_name, char* out_name);
+int seeded_byte(const char* message_name, const char* seed_name, const char* out_name);

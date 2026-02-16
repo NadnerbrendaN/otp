@@ -11,18 +11,21 @@
  */
 
 #include "window.hpp"
-#include "../otp.cpp"
+#include "../otp.hpp"
+
+#include <fstream>
+#include <iostream>
 
 OtpWindow::OtpWindow()
 :
     button_run("Run"),
     button_key("Choose key file"),
     label_id("otp is an encryption system\nCopyright (C) 2026 NadnerbrendaN\nLicensed under the MPL 2.0"),
-    label_encrypt_left("Decrypt"),
-    label_encrypt_right("Encrypt"),
     label_delete("Delete used key data"),
     label_seed("Key is a seed"),
-    label_file("No file chosen")
+    label_file("No key file chosen"),
+    label_out("Name the output file:"),
+    label_mess("Name a message file (overrides text input):")
 {
     set_title("otp");
     set_default_size(640, 480);
@@ -37,22 +40,21 @@ OtpWindow::OtpWindow()
     right_grid.set_margin_start(8);
     right_grid.set_halign(Gtk::Align::FILL);
 
-    left_grid.attach(button_run, 0,0, 3,1);
+    left_grid.attach(button_run, 0,0);
     button_run.set_margin_bottom(16);
     button_run.set_margin_top(24);
     button_run.set_halign(Gtk::Align::CENTER);
     button_run.set_valign(Gtk::Align::CENTER);
     button_run.set_size_request(128,48);
-    //button_run.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::run_encrypt), message));
-
-    left_grid.attach(label_encrypt_left, 0,1);
-    label_encrypt_left.set_margin_end(8);
-    left_grid.attach(label_encrypt_right, 2,1);
-    label_encrypt_right.set_margin_end(8);
-    label_encrypt_right.set_margin_start(8);
-    left_grid.attach(switch_encrypt, 1,1);
-    switch_encrypt.set_valign(Gtk::Align::CENTER);
-    switch_encrypt.set_size_request(48, 24);
+    button_run.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::run_encrypt)));
+    left_grid.attach(label_out, 0,1);
+    left_grid.attach(text_out_name, 0,2);
+    text_out_name.set_margin_bottom(8);
+    text_out_name.set_margin_end(8);
+    left_grid.attach(label_mess, 0,3);
+    left_grid.attach(text_mess_name, 0,4);
+    text_mess_name.set_margin_bottom(8);
+    text_mess_name.set_margin_end(8);
 
     root_grid.attach(scrollbox, 1,0, 1,3);
     scrollbox.set_child(textview);
@@ -117,5 +119,24 @@ void OtpWindow::on_key_finish(Glib::RefPtr<Gio::AsyncResult>& result,
 }
 
 void OtpWindow::run_encrypt() {
-
+    std::string mess_name = ".message.temp";
+    Glib::ustring mess_name_box = text_mess_name.get_buffer()->get_text();
+    Glib::ustring out_name = text_out_name.get_buffer()->get_text();
+    if (!mess_name_box.empty()) {
+        mess_name = mess_name_box;
+    } else {
+        std::ofstream write_message(mess_name);
+        Glib::ustring text = textview.get_buffer()->get_text();
+        size_t text_size = text.size();
+        for (int i = 0; i < text_size; ++i) {
+            write_message.put(text[i]);
+        }
+        write_message.close();
+    }
+    if (switch_seed.get_active()) {
+        seeded_byte(mess_name.data(), filename.data(), out_name.data());
+    } else {
+        unseeded_byte(mess_name.data(), filename.data(), out_name.data(), switch_delete.get_active());
+    }
+    std::remove(".message.temp");
 }

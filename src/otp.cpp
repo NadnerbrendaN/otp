@@ -18,7 +18,7 @@
 #include "otp.hpp"
 #include "chacha.hpp"
 
-int unseeded_byte(char* message_name, char* key_name, char* out_name, bool del) {
+int unseeded_byte(const char* message_name, const char* key_name, const char* out_name, bool del) {
     std::ifstream message_file(message_name);
     std::ifstream key_file(key_name);
     std::ofstream out_file(out_name);
@@ -60,7 +60,7 @@ int unseeded_byte(char* message_name, char* key_name, char* out_name, bool del) 
     return 0;
 }
 
-int seeded_byte(char* message_name, char* seed_name, char* out_name) {
+int seeded_byte(const char* message_name, const char* seed_name, const char* out_name) {
     std::ifstream message_file(message_name);
     std::ifstream seed_file(seed_name);
     std::ofstream out_file(out_name);
