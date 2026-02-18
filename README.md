@@ -30,9 +30,9 @@ Whether or not *otp* truly supplies the theoretical security of the OTP encrypti
 realistically it should do so as long as an attacker only has access to the cyphertext.
 
 Everything inside the `gui/` subdirectory is related to the GTK GUI, which requires gtkmm-4.0 and supporting
-libraries to build. Build instructions are not included, as it significantly depends on your OS and build
-context. Everything else is a few simple c++ files without external dependencies, so I kept all the GTK
-things very separate.
+libraries to build. There is a Makefile for it, but you should make sure it will work for your system before
+using it, as it may significantly depend on your OS and build context. Everything else is a few simple c++
+files without external dependencies, so I kept all the GTK things very separate.
 
 Typically, *otp* reads files one byte at a time and then encrypts each byte in the message file with one
 from the key file. When used with the seed flag, the key is read as a seed for a

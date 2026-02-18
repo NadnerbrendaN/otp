@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=otp
+GenericName=Encryption Tool
+Comment=Encrypt or decrypt files
+Exec=bash -c "\$HOME/.local/bin/otp-gui"
+Terminal=false
+Type=Application
+Keywords=encrypt;decrypt;otp;one time;pad;
