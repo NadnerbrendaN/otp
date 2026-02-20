@@ -58,26 +58,24 @@ file.
 - [ ] Support for other block sizes or processes?
 
 ### To install:
-The CLI is currently the primary easily-buildable form of *otp*. The GUI (built with GTK) requires `gtkmm-4.0`
-and there will not be Makefile support for it, as it is heavily context-dependent, requiring specified paths
-for include directories. These can be found using `pkg-config`, but that cannot be automated in the `Makefile`
-due to differences in shell syntax. If you want the GUI, use a pre-built binary or build it on your own
-machine.
+The CLI is currently the primary easily-buildable form of *otp*, as it does not have external dependencies.
+The GUI (built with GTK) requires `gtkmm-4.0` and there is Makefile support for it, but it should be treated
+as experimental.
 
-There is a `Makefile`, so you can run `make` in the directory if you have `make` installed. This should build the
-executable form from the source code form. `make install` will copy the binary to `/bin/` and `make local` will
-copy the binary to `~/.local/bin/`. If these do not work for you or you do not have `make`, follow the
-instructions below.
+There are `Makefile`s, so you can run `make` in the `src/` directory if you have `make` and `gcc`/`g++`
+installed. This should build the executable form from the source code form. `make install` will copy the
+binary to `/bin/` and `make local` will copy the binary to `~/.local/bin/`. If these do not work for you or
+you do not have `make`, follow the instructions below.
 
 *otp* is primarily a few files of C++ code which only rely on each other and on the standard library, so it
-should be straightforward to compile once you acquire the code. This applies to the CLI only. As mentioned above,
-the GUI is more complex.
+should be straightforward to compile once you acquire the code. This applies to the CLI only. As mentioned
+above, the GUI is more complex.
 
 Here is how I compile it using GCC (but of course you can do it however you want):
 ```shell
 g++ src/main.cpp src/otp.cpp src/chacha.cpp -o otp
 ```
-After that, it's just a matter of running the executable (or moving it to a directory for program binaries, and
+After that, it's just a matter of running the executable (or moving it to a directory for program binaries and
 then running it).
 
 ### To run:
