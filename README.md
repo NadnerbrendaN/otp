@@ -45,13 +45,15 @@ larger than the total length of the messages one wants to send.
 
 ### Compatibility
 I am unsure if *otp* will work on anything other than Linux with some GNU utilities, as that's what I run,
-***but*** I do not know enough about Windows/Unix/etc to rule out compatibility. No matter the OS or any
-other context, no warranty is provided for this program. Read more in the `LICENSE` file.
+***but*** I do not know enough about Windows/Unix/etc to rule out compatibility. Some windows binaries are
+included for releases, but that does not imply they are 100% identical in functionality to Linux releases.
+No matter the OS or any other context, no warranty is provided for this program. Read more in the `LICENSE`
+file.
 
 ### Planned features:
 - [x] Read, encrypt, and write byte-by-byte with precommunicated keys
 - [x] Seeded encryption using the ChaCha cipher for much-less-secure but much-more-convenient communication
-- [ ] UI
+- [x] UI
 - [ ] GEN mode to make random keys and seeds
 - [ ] Support for other block sizes or processes?
 
