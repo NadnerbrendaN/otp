@@ -21,12 +21,13 @@ OtpWindow::OtpWindow()
     button_run("Run"),
     button_key("Choose key file"),
     button_mess("Choose message file"),
+    button_out("Choose output file"),
     label_id("otp is an encryption system\nCopyright (C) 2026 NadnerbrendaN\nLicensed under the MPL 2.0"),
     label_delete("Delete used key data"),
     label_seed("Key is a seed"),
     label_file("No key file chosen"),
-    label_out("Name the output file:"),
-    label_mess("No message file chosen")
+    label_out("No output file chosen"),
+    label_mess("No message file chosen (will override text input)")
 {
     set_title("otp");
     set_default_size(640, 480);
@@ -50,16 +51,22 @@ OtpWindow::OtpWindow()
     button_run.set_valign(Gtk::Align::CENTER);
     button_run.set_size_request(128,48);
     button_run.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::run_encrypt)));
-    left_grid.attach(label_out, 0,1);
-    left_grid.attach(text_out_name, 0,2);
-    text_out_name.set_margin_bottom(8);
-    text_out_name.set_margin_end(8);
+    left_grid.attach(button_out, 0,1);
+    button_out.set_margin_bottom(8);
+    button_out.set_margin_end(8);
+    button_out.set_size_request(128, 48);
+    button_out.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::on_out_button)));
+    left_grid.attach(label_out, 0,2);
+    label_out.set_margin_bottom(8);
+    label_out.set_max_width_chars(16);
+    label_out.set_wrap(true);
     left_grid.attach(button_mess, 0,3);
     button_mess.set_margin_bottom(8);
     button_mess.set_margin_end(8);
     button_mess.set_size_request(128, 48);
     button_mess.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::on_mess_button)));
     left_grid.attach(label_mess, 0,4);
+    label_mess.set_margin_bottom(8);
     label_mess.set_max_width_chars(16);
     label_mess.set_wrap(true);
 
@@ -110,6 +117,24 @@ OtpWindow::OtpWindow()
     label_file.set_size_request(258);
 }
 
+void OtpWindow::on_out_button() {
+    auto dialogue = Gtk::FileDialog::create();
+    dialogue->save(sigc::bind(sigc::mem_fun(*this, &OtpWindow::on_out_finish), dialogue));
+}
+
+void OtpWindow::on_out_finish(Glib::RefPtr<Gio::AsyncResult>& result,
+        Glib::RefPtr<Gtk::FileDialog>& dialogue) {
+    try {
+        auto file = dialogue->save_finish(result);
+        out_file_name = file->get_path();
+        label_out.set_label("Output file: " + out_file_name);
+    } catch (const Gtk::DialogError& err) {
+        std::cout << "Unspecified file. " << err.what() << "\n";
+    } catch (const Glib::Error& err) {
+        std::cout << "Something went wrong: " << err.what() << "\n";
+    }
+}
+
 void OtpWindow::on_key_button() {
     auto dialogue = Gtk::FileDialog::create();
     dialogue->open(sigc::bind(sigc::mem_fun(*this, &OtpWindow::on_key_finish), dialogue));
@@ -119,7 +144,6 @@ void OtpWindow::on_key_finish(Glib::RefPtr<Gio::AsyncResult>& result,
         Glib::RefPtr<Gtk::FileDialog>& dialogue) {
     try {
         auto file = dialogue->open_finish(result);
-        
         key_file_name = file->get_path();
         label_file.set_label("Key file: " + key_file_name);
     } catch (const Gtk::DialogError& err) {
@@ -138,7 +162,6 @@ void OtpWindow::on_mess_finish(Glib::RefPtr<Gio::AsyncResult>& result,
         Glib::RefPtr<Gtk::FileDialog>& dialogue) {
     try {
         auto file = dialogue->open_finish(result);
-        
         message_file_name = file->get_path();
         label_mess.set_label("Message file: " + message_file_name);
     } catch (const Gtk::DialogError& err) {
@@ -151,7 +174,7 @@ void OtpWindow::on_mess_finish(Glib::RefPtr<Gio::AsyncResult>& result,
 void OtpWindow::run_encrypt() {
     label_status.set_markup("<span size='x-large'>Processing...</span>");
     std::string mess_name = ".message.temp";
-    Glib::ustring out_name = text_out_name.get_buffer()->get_text();
+    std::string out_name = out_file_name;
     if (message_file_name != "") {
         mess_name = message_file_name;
     } else {
@@ -171,4 +194,8 @@ void OtpWindow::run_encrypt() {
     }
     std::remove(".message.temp");
     label_status.set_markup("<span size='x-large'>Not active</span>");
+    /* 
+     * TODO: change the above to say the status is "Done" and then make any action such as typing or
+     * flicking switches change it to "Not active".
+     */
 }

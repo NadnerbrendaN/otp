@@ -18,21 +18,23 @@ class OtpWindow : public Gtk::Window {
 public:
   OtpWindow();
 private:
+  void on_out_button();
+  void on_out_finish(Glib::RefPtr<Gio::AsyncResult>&, Glib::RefPtr<Gtk::FileDialog>&);
   void on_key_button();
   void on_key_finish(Glib::RefPtr<Gio::AsyncResult>&, Glib::RefPtr<Gtk::FileDialog>&);
   void on_mess_button();
   void on_mess_finish(Glib::RefPtr<Gio::AsyncResult>&, Glib::RefPtr<Gtk::FileDialog>&);
   void run_encrypt();
 
-  std::string key_file_name, message_file_name;
+  std::string key_file_name, message_file_name, out_file_name;
 
   Gtk::Grid root_grid, left_grid, right_grid;
-  Gtk::Button button_run, button_key, button_mess;
+  Gtk::Button button_run, button_key, button_mess, button_out;
   Gtk::Switch switch_encrypt, switch_delete, switch_seed;
   Gtk::Label label_id, label_encrypt_left, label_encrypt_right, label_delete, label_seed, label_file,
       label_out, label_mess, label_status;
   Gtk::ScrolledWindow scrollbox;
-  Gtk::TextView textview, text_out_name;
+  Gtk::TextView textview;
 };
 
 #endif
