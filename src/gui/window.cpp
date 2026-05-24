@@ -13,6 +13,7 @@
 #include "window.hpp"
 #include "../otp.hpp"
 
+#include <ctime>
 #include <fstream>
 #include <iostream>
 
@@ -21,12 +22,10 @@ OtpWindow::OtpWindow()
     button_run("Run"),
     button_key("Choose key file"),
     button_mess("Choose message file"),
-    button_out("Choose output file"),
     label_id("otp is an encryption system\nCopyright (C) 2026 NadnerbrendaN\nLicensed under the MPL 2.0"),
     label_delete("Delete used key data"),
     label_seed("Key is a seed"),
     label_file("No key file chosen"),
-    label_out("No output file chosen"),
     label_mess("No message file chosen (will override text input)")
 {
     set_title("otp");
@@ -50,22 +49,13 @@ OtpWindow::OtpWindow()
     button_run.set_halign(Gtk::Align::CENTER);
     button_run.set_valign(Gtk::Align::CENTER);
     button_run.set_size_request(128,48);
-    button_run.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::run_encrypt)));
-    left_grid.attach(button_out, 0,1);
-    button_out.set_margin_bottom(8);
-    button_out.set_margin_end(8);
-    button_out.set_size_request(128, 48);
-    button_out.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::on_out_button)));
-    left_grid.attach(label_out, 0,2);
-    label_out.set_margin_bottom(8);
-    label_out.set_max_width_chars(16);
-    label_out.set_wrap(true);
-    left_grid.attach(button_mess, 0,3);
+    button_run.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::on_out_button)));
+    left_grid.attach(button_mess, 0,1);
     button_mess.set_margin_bottom(8);
     button_mess.set_margin_end(8);
     button_mess.set_size_request(128, 48);
     button_mess.signal_clicked().connect(sigc::bind(sigc::mem_fun(*this, &OtpWindow::on_mess_button)));
-    left_grid.attach(label_mess, 0,4);
+    left_grid.attach(label_mess, 0,2);
     label_mess.set_margin_bottom(8);
     label_mess.set_max_width_chars(16);
     label_mess.set_wrap(true);
@@ -127,12 +117,12 @@ void OtpWindow::on_out_finish(Glib::RefPtr<Gio::AsyncResult>& result,
     try {
         auto file = dialogue->save_finish(result);
         out_file_name = file->get_path();
-        label_out.set_label("Output file: " + out_file_name);
     } catch (const Gtk::DialogError& err) {
         std::cout << "Unspecified file. " << err.what() << "\n";
     } catch (const Glib::Error& err) {
         std::cout << "Something went wrong: " << err.what() << "\n";
     }
+    run_encrypt();
 }
 
 void OtpWindow::on_key_button() {
@@ -193,9 +183,5 @@ void OtpWindow::run_encrypt() {
         unseeded_byte(mess_name.data(), key_file_name.data(), out_name.data(), switch_delete.get_active());
     }
     std::remove(".message.temp");
-    label_status.set_markup("<span size='x-large'>Not active</span>");
-    /* 
-     * TODO: change the above to say the status is "Done" and then make any action such as typing or
-     * flicking switches change it to "Not active".
-     */
+    label_status.set_markup("<span size='x-large'>Done</span>");
 }
