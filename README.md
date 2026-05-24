@@ -18,20 +18,21 @@ The file `main.cpp` makes a simple command line interface for the actual program
 `otp.cpp`, containing the logic and code for encryption, and `chacha.cpp`, which contains an algorithm
 needed to implement seeded random use.
 
-Everything inside the `src/gui/` subdirectory is related to the GTK GUI, which requires gtkmm-4.0 and supporting
-libraries to build. These are only required for the GUI, while the CLI has no external dependencies.
+Everything inside the `src/gui/` subdirectory is related to the GTK GUI, which requires gtkmm-4.0 and
+supporting libraries to build. These are only required for the GUI, while the CLI has no external
+dependencies other than the C++ standard library.
 
 When used with the seed flag, the key is read as a seed for a
 [ChaCha](https://en.wikipedia.org/wiki/Salsa20#ChaCha_variant)-style
-[CSPRNG](https://en.wikipedia.org/wiki/CSPRNG). This reduces the amount of communicated data necessary to encrypt
-the message, as the only data necessary is a 320-bit (40 byte) seed
-from which the true key data is generated. As mentioned earlier, this does reduce security, but *otp* is much
-easier to use when the key can be a short passphrase or data sequence instead of a massive pile of data
-larger than the total length of the messages one wants to send.
+[CSPRNG](https://en.wikipedia.org/wiki/CSPRNG). This reduces the amount of communicated data necessary to
+encrypt the message, as the only data necessary is a 320-bit (40 byte) seed from which the true key data is
+generated. As mentioned earlier, this does reduce security, but *otp* is much easier to use when the key can
+be a short passphrase or data sequence instead of a massive pile of data larger than the total length of the
+messages one wants to send.
 
 ### Compatibility
 I am unsure if *otp* will work on anything other than Linux with some GNU utilities, as that's what I run,
-***but*** I do not know enough about Windows/Unix/etc to rule out compatibility. Some windows binaries are
+***but*** I do not know enough about Windows/Unix/etc to rule out compatibility. Some windows binaries may be
 included for releases, but that does not imply they are 100% identical in functionality to Linux releases.
 No matter the OS or any other context, no warranty is provided for this program. Read more in the `LICENSE`
 file.
